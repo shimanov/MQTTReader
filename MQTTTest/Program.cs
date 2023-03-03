@@ -4,6 +4,9 @@ using MQTTnet.Client;
 using Newtonsoft.Json;
 using Spectre.Console;
 using Spectre.Console.Json;
+using System.Text.Json;
+using MQTTTest;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 static class Program
 {
@@ -29,16 +32,16 @@ static class Program
 
             mqttClient.ApplicationMessageReceivedAsync += e =>
             {
-                var jsonResult = Deserialize(e.ApplicationMessage.Payload);
-                AnsiConsole.Write(new JsonText(jsonResult.ToString())
-                    .BracesColor(Color.Red)
-                    .BracketColor(Color.Green)
-                    .ColonColor(Color.Blue)
-                    .CommaColor(Color.Red)
-                    .StringColor(Color.Green)
-                    .NumberColor(Color.Blue)
-                    .BooleanColor(Color.Red)
-                    .NullColor(Color.Green));
+                var entityMqtt = JsonSerializer.Deserialize<EntityMqtt>(e.ApplicationMessage.Payload);
+                if (entityMqtt.action != string.Empty)
+                {
+                    AnsiConsole.MarkupLine($"[blue]Action:[/][green]{entityMqtt.action}[/]");
+                    AnsiConsole.MarkupLine($"[blue]Last seen:[/][green]{entityMqtt.last_seen}[/]");
+                    AnsiConsole.MarkupLine($"[blue]Side:[/][green]{entityMqtt.side}[/]");
+                    AnsiConsole.MarkupLine($"[blue]Angle:[/][green]{entityMqtt.angle}[/]");
+                    AnsiConsole.MarkupLine($"[blue]Link quality:[/][green]{entityMqtt.linkquality}[/]");
+                }
+
                 return Task.CompletedTask;
             };
             
